@@ -3,6 +3,8 @@ import os
 import json
 import numpy as np
 import pandas as pd
+## CountVectorizer gets the frequency of each word in binary format 
+##i.e. present or absent frequency but TfidfVectorizer finds the overall weightage of each word in the complete document of words
 from pandas.io.json import json_normalize
 import re
 
@@ -11,7 +13,7 @@ from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 from sklearn.metrics.pairwise import pairwise_distances
 
 
-DATA_DIR = './'
+
 
 def load_df(json_path='name.json'):
     """
@@ -19,10 +21,18 @@ def load_df(json_path='name.json'):
     """
     df = pd.read_json(json_path)
     
+    ## working on just the column named Issues in the df(dataframe) created above as it has all the text needed for NLP
+    ## next normalizing the json data to a flat table 
+    ## then spliting the data inside the issuses column into sub columns
+    ## finally merging all the subcolumns together with the dataframe after droping the "column" from it 
+    
     for column in ['Issues']:
         column_as_df = json_normalize(df[column])
         column_as_df.columns = [str(column+"_"+subcolumn) for subcolumn in column_as_df.columns]
         df = df.drop(column, axis=1).merge(column_as_df, right_index=True, left_index=True)
+        
+         ##axis refers to function being performed column wise instead of row wise 
+         ## index refers to Using the index from the right and left of DataFrame as the join key
     
     ## function allows to keep the index if we need to merge on the orginal data.
     df = pd.DataFrame([dict(y, index=i) for i, x in enumerate(df['Issues_Messages'].values.tolist()) for y in x])
